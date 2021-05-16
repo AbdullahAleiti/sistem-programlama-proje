@@ -1,0 +1,10 @@
+# Kurulum
+
+`make`
+
+# Kullanım
+
+çalıştırılabilir program bin dosyasında bulunur.
+kilit dosyası `-k path` ile belirtilmediği sürece aynı dosyada bulunan .kilit dosyası kullanılır.
+Kullanma tailmatlari için `./kripto -h`
+

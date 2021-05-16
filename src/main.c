@@ -1,4 +1,18 @@
+/* This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   author: ABDULLAH ALEİTİ
+   e-mail: abdullah.aleiti@ogr.sakarya.edu.tr
+*/
 #include <stdio.h>
+#include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
 #include "jrb.h"
@@ -89,42 +103,69 @@ int kilit_dosyasindan_jrb_doldur(char *dosya,JRB t, int opsiyon){
     if(d!=d8) return -1;
     fclose(file);
   }else{
-    printf("dosya acarken hata olustu.");
-    return -1;
+    printf("Kilit dosyasi bulunamadi yada acarken hata olustu.\n");
+    exit(EXIT_FAILURE);
   }
   return 0;
 }
 
-void hatali_kullanim(){
-  fprintf(stderr,"Kullanim: kripto [-e giris_metin] [-d giris_metin] cikis_metin.\n");
+void kullanim_talimati_yazdir(){
+  fprintf(stderr,"Kullanim: kripto -e giris_metin cikis_metin (kriptola)\n    yada: kripto -d giris_metin cikis_metin (coz)\n\t  [-k kilit_dosyasi] opsiyonel.\n");
   exit(EXIT_FAILURE);
 }
 
 int main(int argc,char **argv){
   JRB t,tmp;
+  FILE *cikis;
+  IS is;
   int opt;
   int opsiyonFlag = -1;
-  char dosyaIsmi[255];
-  while((opt = getopt(argc,argv,"e:d:"))!=-1){
+  char *giris_pathname;
+  char *cikis_pathname = argv[argc-1];
+  char *kilit_pathname = NULL;
+  while((opt = getopt(argc,argv,"he:d:k:"))!=-1){
     switch(opt){
+    case 'h':
+      kullanim_talimati_yazdir();
+      break;
     case 'e':
       opsiyonFlag = 0;
+      giris_pathname = strdup(optarg);
       break;
     case 'd':
       opsiyonFlag = 1;
+      giris_pathname = strdup(optarg);
+      break;
+    case 'k':
+      kilit_pathname = strdup(optarg);
       break;
     default:
-      hatali_kullanim();
+      kullanim_talimati_yazdir();
     }
   }
   
-  if(opsiyonFlag == -1) hatali_kullanim();
+  if(opsiyonFlag == -1) kullanim_talimati_yazdir();
   
+  is = new_inputstruct(giris_pathname);
+  if(is == NULL){
+    perror(giris_pathname);
+    exit(1);
+  }
+
+  cikis = fopen(cikis_pathname,"w+");
   t = make_jrb();
-  if(kilit_dosyasindan_jrb_doldur(".kilit",t,opsiyonFlag) != -1){
-    jrb_traverse(tmp, t) {
-      printf("%s %s\n", tmp->key, tmp->val);
+  if(kilit_dosyasindan_jrb_doldur(kilit_pathname == NULL ? ".kilit" : kilit_pathname,t,opsiyonFlag) != -1){
+    while(get_line(is) >= 0) {
+      for (int i = 0; i < is->NF; i++) {
+	tmp = jrb_find_str(t,is->fields[i]);
+	tmp == NULL ? fputs(is->fields[i],cikis) : fputs(jval_s(tmp->val),cikis);
+	fputc(' ',cikis);
+      }
+      fputc('\n',cikis);
     }
+  }else{
+    fprintf(stderr,"Hata: bozuk kilit dosyasi.\n");
+    exit(1);
   }
   return 0;
 }
