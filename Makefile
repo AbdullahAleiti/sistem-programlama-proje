@@ -7,6 +7,7 @@ link: compile
 compile: $(objects)
 
 obj/jrb.o: src/jrb.c
+	mkdir -p obj
 	$(cc) -I include -c $< -o $@
 
 obj/fields.o: src/fields.c
@@ -20,5 +21,4 @@ obj/main.o: src/main.c
 
 clean:
 	@rm obj/*
-	@rm bin/*
-
+	@rm bin/kripto
