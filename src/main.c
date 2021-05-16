@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "jrb.h"
 #include "fields.h"
 
+// opsiyon 0'da encode modu, 0'dan farkli her sayi icin decode 
 int kilit_dosyasindan_jrb_doldur(char *dosya,JRB t, int opsiyon){
   enum Durum {d1,d2,d3,d4,d5,d6,d7,d8};
   FILE *file;
@@ -93,10 +95,33 @@ int kilit_dosyasindan_jrb_doldur(char *dosya,JRB t, int opsiyon){
   return 0;
 }
 
+void hatali_kullanim(){
+  fprintf(stderr,"Kullanim: kripto [-e giris_metin] [-d giris_metin] cikis_metin.\n");
+  exit(EXIT_FAILURE);
+}
+
 int main(int argc,char **argv){
   JRB t,tmp;
+  int opt;
+  int opsiyonFlag = -1;
+  char dosyaIsmi[255];
+  while((opt = getopt(argc,argv,"e:d:"))!=-1){
+    switch(opt){
+    case 'e':
+      opsiyonFlag = 0;
+      break;
+    case 'd':
+      opsiyonFlag = 1;
+      break;
+    default:
+      hatali_kullanim();
+    }
+  }
+  
+  if(opsiyonFlag == -1) hatali_kullanim();
+  
   t = make_jrb();
-  if(kilit_dosyasindan_jrb_doldur(".kilit",t,1) != -1){
+  if(kilit_dosyasindan_jrb_doldur(".kilit",t,opsiyonFlag) != -1){
     jrb_traverse(tmp, t) {
       printf("%s %s\n", tmp->key, tmp->val);
     }
