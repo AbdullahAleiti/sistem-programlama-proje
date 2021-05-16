@@ -1,0 +1,5 @@
+*~
+obj/*
+bin/*
+!bin/.kilit
+!bin/istiklal_marsi.txt
