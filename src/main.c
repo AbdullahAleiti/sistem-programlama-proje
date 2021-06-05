@@ -15,6 +15,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "jrb.h"
 #include "fields.h"
 
@@ -32,11 +33,8 @@ int kilit_dosyasindan_jrb_doldur(char *dosya,JRB t, int opsiyon){
     char c;
     char son_karakter;
     unsigned int buffer_indeks;
-    unsigned int karakter_sayisi = 0;
-    unsigned int virgul_sayisi = 0;
-    unsigned int token_sayisi = 0;
     while((c = fgetc(file))!= EOF){
-      if(c=='\n' || (c==' '&& d!=d3 && d!=d6) )
+      if(isspace(c) && d!=d3 && d!=d6)
 	continue;
       else {
 	switch (d){
